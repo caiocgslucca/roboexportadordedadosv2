@@ -1,6 +1,6 @@
-# app_robo_exportador_multi.py
-import os, json, threading, getpass, time, uuid, tkinter as tk, shutil
-from tkinter import filedialog
+# web_robo_exportador.py
+
+import os, json, threading, getpass, time, uuid, shutil
 from datetime import datetime, timedelta, time as dtime
 from flask import Flask, request, redirect, url_for, render_template_string, jsonify
 from selenium import webdriver
@@ -13,6 +13,17 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
 from collections import deque
 from calendar import monthrange
+
+# ---- Tkinter opcional (para não quebrar em servidor Linux) ----
+try:
+    import tkinter as tk
+    from tkinter import filedialog
+    HAS_TK = True
+except Exception:
+    tk = None
+    filedialog = None
+    HAS_TK = False
+# ---------------------------------------------------------------
 
 APP = Flask(__name__)
 CRED_FILE = "credenciais.txt"
@@ -1633,6 +1644,8 @@ def executar_robo(rid):
 
 @APP.get("/pick_folder_native")
 def pick_folder_native():
+    if not HAS_TK:
+        return jsonify({"ok": False, "error": "Seleção de pasta nativa não está disponível neste servidor."}), 500
     try:
         root = tk.Tk()
         root.withdraw()
